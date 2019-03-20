@@ -1,7 +1,8 @@
 'use strict';
 
-const axios = require('axios');
-const cheerio = require('cheerio');
+// const axios = require('axios');
+// const cheerio = require('cheerio');
+const { closeBrowser, initBrowser, getScreenshot } = require('./chromium');
 const host = 'https://www.amazon.co.jp';
 let amazonCategoryUrl = [];
 
@@ -48,27 +49,29 @@ async function featchCategories(url, selector) {
     })
 }
 
-async function start(url, selector, counter) {
+async function start(urls, selector, counter) {
     if (counter == 0) {
-        url = `${host}/ranking?type=top-sellers`
+        urls = [`${host}/ranking?type=top-sellers`]
         selector = '#crown-category-nav > a'
     }
     // check end point
     // For example, highlight(.zg_selected) category's layer equals most deep category's layer
     // ... not code
 
-    const categories = await featchCategories(url, selector)
-    amazonCategoryUrl = amazonCategoryUrl.concat(categories)
-    if (counter >= 1) {
-        console.log(amazonCategoryUrl)
-        console.log('end loop')
-        // oh.. can't access page to need one step
-        return;
-    }
-    categories.forEach(url => {
-        counter++;
-        start(url, '#zg_browseRoot > ul > ul > li > a', counter)
+    const browser = await initBrowser()
+    let data = await Promise.all(
+        urls.map(url => getScreenshot(browser, url, selector)
+    ))
+    data = data[0].map(attr => {
+        return attr.startsWith(host) ? attr : `${host}${attr}`
     })
+    data = data.slice(0,2)
+    console.log(data)
+    const data2 = await Promise.all(
+        data.map(url => getScreenshot(browser, url, '#zg_browseRoot > ul  ul  li  a')
+    ))
+    console.log(data2)
+    await closeBrowser(browser)
 }
 
 start(null, null, 0)

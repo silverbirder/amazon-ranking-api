@@ -1,7 +1,6 @@
 const http = require('http');
-const { parse } = require('url');
 const { getScreenshot } = require('./chromium');
-const { getInt, getUrlFromPath, isValidUrl } = require('./validator');
+
 
 // HTTPサーバーのイベントハンドラを定義
 http.createServer(function (req, res) {
@@ -15,4 +14,4 @@ const test = async function(req, res) {
     res.end(file.join(','))
 }
 
-process.on('unhandledRejection', console.dir);
+// process.on('unhandledRejection', console.dir);
