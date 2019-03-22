@@ -45,7 +45,12 @@ async function evalFlatListFunc(page, selector) {
 }
 
 async function evalDeepListFunc(page, selector) {
-    console.log(selector)
+    // for adult only page ...
+    if (await page.$('body > center > span.alert') != null) {
+        await page.click('body > center > div:nth-child(6) > a')
+        await page.waitForSelector(selector);
+    }
+
     let deepUlSelector = `${selector} > ul`
     // find deep category
     while(true) {

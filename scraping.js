@@ -60,24 +60,27 @@ async function featchCategories(url, selector) {
 }
 
 async function start(urls, selector, counter) {
-    if (counter == 0) {
-        urls = [`${host}/ranking?type=top-sellers`]
-        selector = '#crown-category-nav > a'
-    }
-
+    // if (counter == 0) {
+    //     urls = [`${host}/ranking?type=top-sellers`]
+    //     selector = '#crown-category-nav > a'
+    // }
+    // amazonCategoryUrl.concat(urls)
     const browser = await initBrowser();
-    let data = await Promise.all(
-        urls.map(url => getScreenshot(browser, url, selector, evalFlatListFunc)
-    ))
-    data = data[0].map(attr => {
-        return attr.startsWith(host) ? attr : `${host}${attr}`
-    })
-    const splitData = splitArray(data, 3)
+    // let topAmazonCategoryUrl = await Promise.all(
+    //     urls.map(url => getScreenshot(browser, url, selector, evalFlatListFunc)
+    // ))
+    // topAmazonCategoryUrl = topAmazonCategoryUrl[0].map(attr => {
+    //     return attr.startsWith(host) ? attr : `${host}${attr}`
+    // })
+    // amazonCategoryUrl.concat(topAmazonCategoryUrl)
+    // const splitData = splitArray(topAmazonCategoryUrl, 3)
+    const splitData = [["https://www.amazon.co.jp/gp/bestsellers/books/466294/ref=zg_bs_nav_b_1_b", "https://www.amazon.co.jp/gp/bestsellers/books/10667101/ref=zg_bs_nav_b_1_b"]]
     for (let i=0; i<splitData.length; i++) {
-        const urls = await Promise.all(
+        const categoryUrl = await Promise.all(
             splitData[i].map(url => getScreenshot(browser, url, '#zg_browseRoot', evalDeepListFunc)
         ))
-        console.log(urls)
+        console.log(categoryUrl)
+        amazonCategoryUrl.concat(categoryUrl)
         break
     }
     await closeBrowser(browser)
