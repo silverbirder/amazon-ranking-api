@@ -21,7 +21,7 @@ async function initBrowser() {
 async function closeBrowser(browser) {
     await browser.close();
 }
-async function getScreenshot(browser, url, selector) {
+async function getScreenshot(browser, url, selector, evalFunc) {
     const page = await browser.newPage();
     await page.setRequestInterception(true);
     page.on('request', interceptedRequest => {
@@ -36,10 +36,31 @@ async function getScreenshot(browser, url, selector) {
     if (response.status() !== 200) {
         return [];
     }
-    const data = await page.$$eval(selector, list => {
+    return await evalFunc(page, selector)
+}
+async function evalFlatListFunc(page, selector) {
+    return await page.$$eval(selector, list => {
         return list.map(data => data.getAttribute('href'));
     });
-    return data;
 }
 
-module.exports = { closeBrowser, initBrowser, getScreenshot };
+async function evalDeepListFunc(page, selector) {
+    console.log(selector)
+    let deepUlSelector = `${selector} > ul`
+    // find deep category
+    while(true) {
+        if (await page.$(`${deepUlSelector} > ul`) === null) {
+            break;
+        }
+        deepUlSelector += ' > ul'
+    }
+    // If puppeteer finds bottom category (but, except first-child to get anchor href), return empty array.
+    if (await page.$(`${deepUlSelector} > li:not(:first-child) > .zg_selected`) !== null) {
+        return []
+    }
+    // get anchor href
+    return await page.$$eval(`${deepUlSelector} > li > a`, list => {
+        return list.map(data => data.getAttribute('href'));
+    })
+}
+module.exports = { closeBrowser, initBrowser, getScreenshot, evalFlatListFunc, evalDeepListFunc };

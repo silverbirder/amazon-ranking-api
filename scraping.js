@@ -2,7 +2,7 @@
 
 // const axios = require('axios');
 // const cheerio = require('cheerio');
-const { closeBrowser, initBrowser, getScreenshot } = require('./chromium');
+const { closeBrowser, initBrowser, getScreenshot, evalFlatListFunc, evalDeepListFunc } = require('./chromium');
 const host = 'https://www.amazon.co.jp';
 let amazonCategoryUrl = [];
 
@@ -32,6 +32,16 @@ function getContentAttrByList(html, selector, attr) {
     return content;
 }
 
+function splitArray(ary, size) {
+    let resultArray = [];
+    for (let i=0; i< Math.ceil(ary.length/size); i++) {
+        const start = i*size;
+        const end = start + size;
+        resultArray.push(ary.slice(start, end))
+    }
+    return resultArray;
+}
+
 async function featchCategories(url, selector) {
     const response = await axios(url);
     // add host and delete not need parameter
@@ -54,23 +64,22 @@ async function start(urls, selector, counter) {
         urls = [`${host}/ranking?type=top-sellers`]
         selector = '#crown-category-nav > a'
     }
-    // check end point
-    // For example, highlight(.zg_selected) category's layer equals most deep category's layer
-    // ... not code
 
-    const browser = await initBrowser()
+    const browser = await initBrowser();
     let data = await Promise.all(
-        urls.map(url => getScreenshot(browser, url, selector)
+        urls.map(url => getScreenshot(browser, url, selector, evalFlatListFunc)
     ))
     data = data[0].map(attr => {
         return attr.startsWith(host) ? attr : `${host}${attr}`
     })
-    data = data.slice(0,2)
-    console.log(data)
-    const data2 = await Promise.all(
-        data.map(url => getScreenshot(browser, url, '#zg_browseRoot > ul  ul  li  a')
-    ))
-    console.log(data2)
+    const splitData = splitArray(data, 3)
+    for (let i=0; i<splitData.length; i++) {
+        const urls = await Promise.all(
+            splitData[i].map(url => getScreenshot(browser, url, '#zg_browseRoot', evalDeepListFunc)
+        ))
+        console.log(urls)
+        break
+    }
     await closeBrowser(browser)
 }
 
