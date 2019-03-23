@@ -36,7 +36,9 @@ async function getScreenshot(browser, url, selector, evalFunc) {
     if (response.status() !== 200) {
         return [];
     }
-    return await evalFunc(page, selector)
+    const result = await evalFunc(page, selector)
+    await page.close()
+    return result
 }
 async function evalFlatListFunc(page, selector) {
     return await page.$$eval(selector, list => {
@@ -58,10 +60,6 @@ async function evalDeepListFunc(page, selector) {
             break;
         }
         deepUlSelector += ' > ul'
-    }
-    // If puppeteer finds bottom category (but, except first-child to get anchor href), return empty array.
-    if (await page.$(`${deepUlSelector} > li:not(:first-child) > .zg_selected`) !== null) {
-        return []
     }
     // get anchor href
     return await page.$$eval(`${deepUlSelector} > li > a`, list => {
