@@ -37,6 +37,7 @@ async function getScreenshot(browser, url, selector, evalFunc) {
         return [];
     }
     const result = await evalFunc(page, selector)
+    console.log(`process...done:${url}`)
     await page.close()
     return result
 }
