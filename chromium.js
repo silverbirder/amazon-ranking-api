@@ -74,6 +74,9 @@ async function evalGetTopFunc(page, selector) {
         await page.click('body > center > div:nth-child(6) > a')
         await page.waitForSelector(selector);
     }
+    const category = await page.$eval('#zg_listTitle .category', item => {
+        return item.textContent;
+    });
     let result = []
     const items = await page.$$('#zg_critical .zg_itemRow')
     for (let i=0; i<items.length; i++) {
@@ -96,7 +99,10 @@ async function evalGetTopFunc(page, selector) {
             link: link
         })
     }
-    return result
+    return {
+        category: category,
+        items: result
+    }
 }
 
 module.exports = { closeBrowser, initBrowser, getAmazonCategoryUrl, evalFlatListFunc, evalDeepListFunc, evalGetTopFunc };
