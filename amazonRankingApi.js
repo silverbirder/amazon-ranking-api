@@ -2,6 +2,17 @@ const output = require('./output')()
 const { closeBrowser, initBrowser, getAmazonCategoryUrl, evalGetTopFunc } = require('./chromium');
 
 module.exports = async function (req, res) {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Request-Method', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    if ( req.method === 'OPTIONS' ) {
+        res.writeHead(200);
+        res.end();
+        return;
+    }
+
     const max = output.length - 1
     const random = Math.floor(Math.random() * (max + 1))
     const amazonCategoryUrl = output[random]
