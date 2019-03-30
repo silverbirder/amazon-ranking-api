@@ -1,4 +1,5 @@
 {
+    "name": "amazon-ranking-api",
     "version": 2,
     "builds": [
         { "src": "amazonRankingApi.js", "use": "@now/node", "config": { "maxLambdaSize": "40mb" } }
