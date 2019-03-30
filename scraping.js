@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs')
-const { closeBrowser, initBrowser, getScreenshot, evalFlatListFunc, evalDeepListFunc } = require('./chromium');
+const { closeBrowser, initBrowser, getAmazonCategoryUrl, evalFlatListFunc, evalDeepListFunc } = require('./chromium');
 const host = 'https://www.amazon.co.jp';
 const matchAmazonCategoryUrlByGp = new RegExp('^https\:\/\/www\.amazon\.co\.jp\/gp\/([^/]+\/){2,3}');
 const matchAmazonCategoryUrlByTrends = new RegExp('^https\:\/\/www\.amazon\.co\.jp\/treands\/[^/]+\/?');
@@ -49,7 +49,7 @@ async function searchCategory(browser, urls, obj) {
     const sUrls = splitArray(urls, 4)
     for (let i=0; i<sUrls.length; i++) {
         const category = await Promise.all(
-            sUrls[i].map(url => getScreenshot(browser, url, obj.selector, obj.action)
+            sUrls[i].map(url => getAmazonCategoryUrl(browser, url, obj.selector, obj.action)
             )
         )
         categories.push(reduceArray(category))
@@ -83,13 +83,13 @@ async function start(entryUrl, firstSelector, otherSelector, firstAction, otherA
     await closeBrowser(browser)
 }
 
-const entryUrl = `${host}/ranking?type=top-sellers`,
-    firstSelector = '#crown-category-nav > a',
-    otherSelector = '#zg_browseRoot',
-    firstAction = evalFlatListFunc,
-    otherAction = evalDeepListFunc
-start(entryUrl, firstSelector, otherSelector, firstAction, otherAction).then(() => {
-    fs.writeFileSync("output.txt", amazonCategoryUrl.join('\n'));
-}).catch((error) => {
-    console.error(error)
-})
+// const entryUrl = `${host}/ranking?type=top-sellers`,
+//     firstSelector = '#crown-category-nav > a',
+//     otherSelector = '#zg_browseRoot',
+//     firstAction = evalFlatListFunc,
+//     otherAction = evalDeepListFunc
+// start(entryUrl, firstSelector, otherSelector, firstAction, otherAction).then(() => {
+//     fs.writeFileSync("output.txt", amazonCategoryUrl.join('\n'));
+// }).catch((error) => {
+//     console.error(error)
+// })
